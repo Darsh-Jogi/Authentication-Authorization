@@ -12,7 +12,7 @@ const handleauthuser = async (req, res) => {
         if (!checkuser) {
             return res.status(401).json({ success: false, message: "Unauthorized or User not found" })
         }
-        res.status(200).json({ success: true, message: "User data", user: checkuser })
+        res.status(200).json({ success: true, message: "User data", user: checkuser, type : "Auth-User" })
     } catch (error) {
         console.log(error)
         return res.status(500).json({ success: false, message: "Server Error please try again" })
@@ -46,7 +46,7 @@ const handleSignup = async (req, res) => {
                 })
                 GenerateJWTTokenandSetCookie(res, newUser._id)
                 const emailverifystatus = await SendVerificationEmail(email, newUser.verificationtoken)
-                res.json({ success: true, message: "User registered successfully", user: newUser, emailverifystatus: emailverifystatus })
+                res.json({ success: true, message: "User registered successfully", user: newUser, emailverifystatus: emailverifystatus, type : "Sign-Up-User" })
             } catch (error) {
                 console.log(error)
                 return res.status(500).json({ success: false, message: "Server Error please try again" })
@@ -73,7 +73,7 @@ const handleverifyemail = async (req, res) => {
         user.verificationtokenexpires = undefined
         await user.save()
         const SendwelComeEmailStatus = await SendWelcomeEmail(user.email, user.firstname, user.lastname)
-        res.status(200).json({ success: true, message: "user verified successfully", welcomeemailstatus: SendwelComeEmailStatus })
+        res.status(200).json({ success: true, message: "user verified successfully", welcomeemailstatus: SendwelComeEmailStatus, type : "Verify-User-Email" })
     }
     catch (err) {
         console.error(err)
@@ -85,7 +85,7 @@ const handleverifyemail = async (req, res) => {
 const handlelogout = async (req, res) => {
     try {
         res.clearCookie("token")
-        res.status(200).json({ success: true, message: "Logged out successfully" })
+        res.status(200).json({ success: true, message: "Logged out successfully", type : "Logout-User" })
     } catch (error) {
         console.error(error)
         return res.status(500).json({ success: false, message: "Internal server Error" })
@@ -107,7 +107,7 @@ const handlelogin = async (req, res) => {
         GenerateJWTTokenandSetCookie(res, checkuser._id)
         checkuser.lastlogin = new Date()
         await checkuser.save()
-        res.json({ success: true, message: "Login Successful", user: checkuser })
+        res.json({ success: true, message: "Login Successful", user: checkuser, type : "Login-User"})
 
     } catch (error) {
         console.error(error)
@@ -131,7 +131,7 @@ const handleforgotpassword = async (req, res) => {
 
         const URL = `${process.env.CLIENT_URL}/auth/resetpassword/${resetToken}`
         const emailResetStatus = await SendForgotPasswordEmail(email, URL)
-        res.status(200).json({ success: true, message: "Reset Password Email sent successfully", emailresetstatus: emailResetStatus })
+        res.status(200).json({ success: true, message: "Reset Password Email sent successfully", emailresetstatus: emailResetStatus, type : "Forgot-User-Password"})
 
     } catch (error) {
         console.error(error)
@@ -154,7 +154,7 @@ const handleresetpassword = async (req, res) => {
         checkuser.resetpasswordexpires = undefined
         await checkuser.save()
         const ResetPasswordEmailStatus = await SendResetPasswordConfimation(checkuser.email)
-        res.status(200).json({ success: true, message: "Password Reset Successful", resetpasswordemailstatus: ResetPasswordEmailStatus })
+        res.status(200).json({ success: true, message: "Password Reset Successful", resetpasswordemailstatus: ResetPasswordEmailStatus, type : "Reset-User-Password"})
     } catch (err) {
         console.error(err)
         return res.status(500).json({ success: false, message: "Internal server Error" })
